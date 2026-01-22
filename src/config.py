@@ -41,7 +41,7 @@ class TrainingConfig:
     """Training-related configuration."""
     output_dir: str = "../models/checkpoints"
     logging_dir: str = "../logs"
-    model_save_dir: str = "../models"
+    model_save_dir: str = "../models/best_model"
     results_dir: str = "../results"
     num_epochs: int = 10
     batch_size: int = 16

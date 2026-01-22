@@ -6,7 +6,7 @@ Includes logging setup, metric visualization, and helper functions.
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 import json
 import random
 
@@ -159,84 +159,5 @@ def plot_confusion_matrix(
     plt.close()
     
     logging.info(f"Confusion matrix saved to {output_path}")
-
-
-def plot_training_history(
-    history: Dict[str, List[float]],
-    output_path: str,
-    title: str = "Training History"
-):
-    """
-    Plot training history metrics.
-    
-    Args:
-        history: Dictionary containing metric histories
-        output_path: Path to save plot
-        title: Plot title
-    """
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    fig, axes = plt.subplots(2, 2, figsize=(15, 10))
-    fig.suptitle(title)
-    
-    metrics_to_plot = ['loss', 'accuracy', 'f1', 'learning_rate']
-    
-    for idx, metric in enumerate(metrics_to_plot):
-        ax = axes[idx // 2, idx % 2]
-        
-        # Plot train metric
-        if f'train_{metric}' in history:
-            ax.plot(history[f'train_{metric}'], label=f'Train {metric}')
-        
-        # Plot validation metric
-        if f'val_{metric}' in history:
-            ax.plot(history[f'val_{metric}'], label=f'Val {metric}')
-        
-        ax.set_xlabel('Step')
-        ax.set_ylabel(metric.capitalize())
-        ax.set_title(f'{metric.capitalize()} over time')
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-    
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    plt.close()
-    
-    logging.info(f"Training history plot saved to {output_path}")
-
-
-def print_dataset_statistics(train_df, val_df, test_df):
-    """
-    Print dataset statistics.
-    
-    Args:
-        train_df: Training DataFrame
-        val_df: Validation DataFrame
-        test_df: Test DataFrame
-    """
-    logger = logging.getLogger(__name__)
-    
-    logger.info("\n" + "="*60)
-    logger.info("DATASET STATISTICS")
-    logger.info("="*60)
-    
-    total_samples = len(train_df) + len(val_df) + len(test_df)
-    
-    logger.info(f"\nTotal samples: {total_samples}")
-    logger.info(f"Train samples: {len(train_df)} ({len(train_df)/total_samples*100:.1f}%)")
-    logger.info(f"Validation samples: {len(val_df)} ({len(val_df)/total_samples*100:.1f}%)")
-    logger.info(f"Test samples: {len(test_df)} ({len(test_df)/total_samples*100:.1f}%)")
-    
-    logger.info("\nClass distribution:")
-    for split_name, df in [("Train", train_df), ("Val", val_df), ("Test", test_df)]:
-        logger.info(f"\n{split_name} set:")
-        counts = df['label'].value_counts().sort_index()
-        for label, count in counts.items():
-            percentage = count / len(df) * 100
-            logger.info(f"  {label}: {count} ({percentage:.1f}%)")
-    
-    logger.info("\n" + "="*60 + "\n")
-
 
 

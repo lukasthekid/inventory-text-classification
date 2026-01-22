@@ -24,7 +24,6 @@ from sklearn.metrics import (
     confusion_matrix
 )
 import mlflow
-import mlflow.pytorch
 
 from config import Config, ID_TO_LABEL
 
@@ -292,57 +291,5 @@ class ModelTrainer:
         except Exception as e:
             logger.error(f"Error saving model: {e}")
             raise
-    
-    def log_to_mlflow(
-        self,
-        train_metrics: Dict,
-        val_metrics: Dict,
-        test_metrics: Dict,
-        model_path: str
-    ):
-        """
-        Log metrics and model to MLflow.
-        
-        Args:
-            train_metrics: Training metrics
-            val_metrics: Validation metrics
-            test_metrics: Test metrics
-            model_path: Path to saved model
-        """
-        try:
-            # Log hyperparameters
-            mlflow.log_params(self.config.to_dict()['data'])
-            mlflow.log_params(self.config.to_dict()['model'])
-            mlflow.log_params(self.config.to_dict()['training'])
-            
-            # Log training metrics
-            for key, value in train_metrics.items():
-                mlflow.log_metric(f"train_{key}", value)
-            
-            # Log validation metrics
-            for key, value in val_metrics.items():
-                if key.startswith('test_'):
-                    key = key.replace('test_', 'val_')
-                mlflow.log_metric(key, value)
-            
-            # Log test metrics
-            for key, value in test_metrics.items():
-                mlflow.log_metric(key, value)
-            
-            # Log model
-            mlflow.pytorch.log_model(
-                self.model,
-                "model",
-                registered_model_name="inventory-classifier"
-            )
-            
-            # Log model artifacts
-            mlflow.log_artifacts(model_path, artifact_path="model_files")
-            
-            logger.info("Successfully logged to MLflow")
-            
-        except Exception as e:
-            logger.error(f"Error logging to MLflow: {e}")
-            # Don't raise - logging failure shouldn't stop the pipeline
 
 

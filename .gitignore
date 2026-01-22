@@ -76,3 +76,4 @@ logs/
 data/new_data.csv
 models/*
 models/special_tokens_map.json
+data/new_data_predictions.csv

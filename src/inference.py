@@ -23,7 +23,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-from config import Config, ID_TO_LABEL, DataConfig
+from config import Config, ID_TO_LABEL
 from utils import setup_logging
 
 # Setup logger

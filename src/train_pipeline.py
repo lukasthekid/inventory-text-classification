@@ -27,13 +27,6 @@ from datetime import datetime
 
 import mlflow
 
-# Try to import mlflow.transformers for better model logging
-try:
-    import mlflow.transformers
-    MLFLOW_TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    MLFLOW_TRANSFORMERS_AVAILABLE = False
-
 from config import Config
 from data_loader import DataLoader
 from model_trainer import ModelTrainer
@@ -41,7 +34,6 @@ from utils import (
     setup_logging,
     save_metrics_to_json,
     plot_confusion_matrix,
-    print_dataset_statistics,
     set_seed_everywhere,
 )
 

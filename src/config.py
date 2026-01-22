@@ -4,8 +4,7 @@ Contains all hyperparameters, paths, and settings.
 """
 
 from dataclasses import dataclass, asdict
-from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 @dataclass
 class LoggingConfig:

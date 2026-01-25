@@ -22,6 +22,12 @@ Make sure you have Python installed and all dependencies:
 pip install -r requirements.txt
 ```
 
+If you want to train on CPU use
+
+```bash
+pip install -r requirements-cpu.txt
+```
+
 ### Step 1: Train the Model
 
 Navigate to the `src` directory and run the training pipeline:
@@ -56,6 +62,7 @@ mlflow ui
 After training, you can make predictions on new data:
 
 ```bash
+cd src
 python .\inference.py --input_csv ../data/new_data.csv
 ```
 

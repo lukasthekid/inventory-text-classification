@@ -11,6 +11,7 @@ import json
 import random
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
@@ -18,6 +19,28 @@ import torch
 from transformers import set_seed as hf_set_seed
 
 from config import ID_TO_LABEL
+
+
+def parse_german_float(value) -> float:
+    """
+    Convert value to float, handling German decimal format (comma as separator).
+    
+    Args:
+        value: Value to convert (str, int, float, or NaN)
+        
+    Returns:
+        Float value or NaN if conversion fails
+    """
+    if pd.isna(value) or value is None or value == "":
+        return np.nan
+    if isinstance(value, (int, float)):
+        return float(value) if not np.isnan(value) else np.nan
+    value_str = str(value).strip().replace(" ", "")
+    value_str = value_str.replace(",", ".")
+    try:
+        return float(value_str)
+    except (ValueError, TypeError):
+        return np.nan
 
 
 def set_seed_everywhere(seed: int) -> None:

@@ -15,6 +15,7 @@ import torch
 from torch.utils.data import Dataset
 
 from config import DataConfig, LABEL_MAP
+from utils import parse_german_float
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -153,28 +154,6 @@ class DataLoader:
         self.df = None
         self.tokenizer = None
         
-    def _parse_german_float(self, value) -> Optional[float]:
-        """
-        Convert value to float, handling German decimal format (comma as separator).
-        
-        Args:
-            value: Value to convert (str, int, float, or NaN)
-            
-        Returns:
-            Float value or None/NaN if conversion fails
-        """
-        if pd.isna(value) or value is None or value == "":
-            return np.nan
-        if isinstance(value, (int, float)):
-            return float(value) if not np.isnan(value) else np.nan
-        value_str = str(value).strip().replace(" ", "")
-        # German format: "2,5" or "43,5" -> replace comma with period
-        value_str = value_str.replace(",", ".")
-        try:
-            return float(value_str)
-        except (ValueError, TypeError):
-            return np.nan
-
     def _validate_columns(self, df: pd.DataFrame) -> None:
         """
         Validate that expected columns exist in the dataset.
@@ -277,7 +256,7 @@ class DataLoader:
             # Handle quantity column: convert German decimal format (comma) to float
             if self.config.quantity_column in df.columns:
                 df[self.config.quantity_column] = df[self.config.quantity_column].apply(
-                    self._parse_german_float
+                    parse_german_float
                 )
             else:
                 df[self.config.quantity_column] = np.nan
@@ -295,7 +274,7 @@ class DataLoader:
             # Handle price column: convert German decimal format (comma) to float
             if self.config.price_column in df.columns:
                 df[self.config.price_column] = df[self.config.price_column].apply(
-                    self._parse_german_float
+                    parse_german_float
                 )
             else:
                 df[self.config.price_column] = np.nan

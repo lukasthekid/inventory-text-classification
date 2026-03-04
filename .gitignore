@@ -76,3 +76,6 @@ logs/
 models/*
 models/special_tokens_map.json
 data/new_data_predictions.csv
+
+# API uploads (temp training datasets)
+data/api_uploads/

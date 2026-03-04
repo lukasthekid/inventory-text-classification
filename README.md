@@ -100,13 +100,13 @@ You can override configuration values using command-line arguments:
 
 ```bash
 # Use custom dataset path
-uv run --directory src train_pipeline.py --dataset_path ../data/my_custom_dataset.xlsx
+uv run --directory src train_pipeline.py --dataset_path ../data/my_custom_dataset.csv
 
 # Use custom model save directory
 uv run --directory src train_pipeline.py --model_save_dir ../models/my_model
 
 # Override multiple settings
-uv run --directory src train_pipeline.py --dataset_path ../data/dataset.xlsx --model_save_dir ../models/production_model
+uv run --directory src train_pipeline.py --dataset_path ../data/dataset.csv --model_save_dir ../models/production_model
 ```
 
 #### Configuration File
@@ -187,14 +187,57 @@ id	text	quantity	unit	price	predicted_label
 
 ---
 
+## 🌐 REST API
+
+The project includes a FastAPI server for training, metrics, and inference via HTTP.
+
+### Quick Start: Swagger Docs
+
+**Start here.** Run the API, then open the interactive Swagger documentation:
+
+```bash
+uv run uvicorn api:app --reload --host 0.0.0.0 --port 8000 --app-dir src
+```
+
+Once the server is running, open **[http://localhost:8000/docs](http://localhost:8000/docs)** for the Swagger UI. You can explore all endpoints, view request/response schemas, and try requests directly from the browser.
+
+Alternative docs (ReDoc): [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+### Endpoints Overview
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/train` | POST | Upload CSV dataset, start training in background. Returns 202 immediately. |
+| `/metrics` | GET | Get test metrics (accuracy, precision, recall, f1) of the newest model. |
+| `/predict` | POST | Upload CSV, receive CSV with `predicted_label` column. No server storage. |
+
+### Example Usage (curl)
+
+```bash
+# Start training (returns 202, training runs in background)
+curl -X POST -F "file=@data/dataset.csv" http://localhost:8000/train
+
+# Get metrics (after training completes)
+curl http://localhost:8000/metrics
+
+# Run inference (returns CSV with predictions)
+curl -X POST -F "file=@data/new_data.csv" http://localhost:8000/predict -o predictions.csv
+```
+
+**Note:** After training completes, restart the API to use the newly trained model for predictions.
+
+---
+
 ## 🏗️ Project Structure
 
 ```
 inventory-text-classification/
 ├── data/                    # 📁 Dataset files
-│   ├── dataset.xlsx        # Training dataset
+│   ├── dataset.csv         # Training dataset
+│   ├── api_uploads/        # Temp datasets from API training
 │   └── new_data.csv        # New data for inference
 ├── src/                     # 📁 Source code
+│   ├── api.py              # 🌐 FastAPI application
 │   ├── config.py           # ⚙️ Configuration settings
 │   ├── train_pipeline.py   # 🏋️ Training script
 │   ├── inference.py        # 🔮 Inference script
@@ -225,6 +268,7 @@ inventory-text-classification/
 - ✅ **Reproducible** - Fixed random seeds and comprehensive logging
 - ✅ **Flexible Configuration** - Centralized config file with CLI overrides
 - ✅ **Production Ready** - Clean code structure with error handling
+- ✅ **REST API** - FastAPI endpoints for training, metrics, and inference
 
 ---
 

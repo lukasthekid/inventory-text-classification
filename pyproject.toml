@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "accelerate>=1.1.0",
+    "fastapi>=0.100",
+    "uvicorn>=0.20",
+    "python-multipart>=0.0.6",
     "torch>=2.9",
     "torchvision>=0.24",
     "transformers>=4.57",

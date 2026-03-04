@@ -24,7 +24,7 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 from config import Config, ID_TO_LABEL
-from utils import setup_logging
+from utils import setup_logging, parse_german_float
 
 # Setup logger
 logger = logging.getLogger(__name__)
@@ -229,19 +229,15 @@ class InferencePipeline:
         # Convert text to string and strip whitespace
         df[text_column] = df[text_column].astype(str).str.strip()
         
-        # Handle additional features if columns exist
+        # Handle additional features if columns exist (German decimal format supported)
         if quantity_column and quantity_column in df.columns:
-            df[quantity_column] = pd.to_numeric(
-                df[quantity_column], errors='coerce'
-            )
+            df[quantity_column] = df[quantity_column].apply(parse_german_float)
         
         if unit_column and unit_column in df.columns:
             df[unit_column] = df[unit_column].astype(str).str.strip()
         
         if price_column and price_column in df.columns:
-            df[price_column] = pd.to_numeric(
-                df[price_column], errors='coerce'
-            )
+            df[price_column] = df[price_column].apply(parse_german_float)
         
         logger.info(f"Preprocessed {len(df)} samples")
         

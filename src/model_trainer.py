@@ -45,10 +45,8 @@ class ModelTrainer:
         self.model = None
         self.tokenizer = None
         self.trainer = None
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
-        logger.info(f"Using device: {self.device}")
+        self.device = torch.device("cpu")
+        logger.info(f"Using device: {self.device} (CPU-only)")
     
     def load_model_and_tokenizer(self) -> Tuple[AutoModelForSequenceClassification, AutoTokenizer]:
         """

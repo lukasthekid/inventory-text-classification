@@ -153,9 +153,64 @@ class DataLoader:
         self.df = None
         self.tokenizer = None
         
+    def _parse_german_float(self, value) -> Optional[float]:
+        """
+        Convert value to float, handling German decimal format (comma as separator).
+        
+        Args:
+            value: Value to convert (str, int, float, or NaN)
+            
+        Returns:
+            Float value or None/NaN if conversion fails
+        """
+        if pd.isna(value) or value is None or value == "":
+            return np.nan
+        if isinstance(value, (int, float)):
+            return float(value) if not np.isnan(value) else np.nan
+        value_str = str(value).strip().replace(" ", "")
+        # German format: "2,5" or "43,5" -> replace comma with period
+        value_str = value_str.replace(",", ".")
+        try:
+            return float(value_str)
+        except (ValueError, TypeError):
+            return np.nan
+
+    def _validate_columns(self, df: pd.DataFrame) -> None:
+        """
+        Validate that expected columns exist in the dataset.
+        
+        Raises:
+            ValueError: If required columns are missing
+        """
+        required_cols = [self.config.text_column, self.config.label_column]
+        missing_cols = [col for col in required_cols if col not in df.columns]
+        
+        if missing_cols:
+            raise ValueError(
+                f"Missing required columns: {missing_cols}. "
+                f"Expected columns: {required_cols}. "
+                f"Available columns: {list(df.columns)}"
+            )
+        
+        if self.config.use_additional_features:
+            optional_cols = [
+                self.config.quantity_column,
+                self.config.unit_column,
+                self.config.price_column,
+            ]
+            missing_optional = [col for col in optional_cols if col not in df.columns]
+            if missing_optional:
+                raise ValueError(
+                    f"Additional feature columns not found: {missing_optional}. "
+                    f"Expected columns (when use_additional_features=True): {required_cols + optional_cols}. "
+                    f"Available columns: {list(df.columns)}"
+                )
+        
+        logger.info(f"Column validation passed. Columns: {list(df.columns)}")
+
     def _load_dataset(self) -> pd.DataFrame:
         """
-        Load dataset from Excel file.
+        Load dataset from CSV file.
         
         Returns:
             Loaded DataFrame
@@ -175,34 +230,12 @@ class DataLoader:
         logger.info(f"Loading dataset from {dataset_path}")
         
         try:
-            df = pd.read_excel(dataset_path, engine='openpyxl')
+            df = pd.read_csv(dataset_path, encoding="utf-8")
         except Exception as e:
-            logger.error(f"Error reading Excel file: {e}")
+            logger.error(f"Error reading CSV file: {e}")
             raise
         
-        # Validate required columns
-        required_cols = [self.config.text_column, self.config.label_column]
-        missing_cols = [col for col in required_cols if col not in df.columns]
-        
-        if missing_cols:
-            raise ValueError(
-                f"Missing required columns: {missing_cols}. "
-                f"Available columns: {df.columns.tolist()}"
-            )
-        
-        # Check for additional feature columns if enabled
-        if self.config.use_additional_features:
-            optional_cols = [
-                self.config.quantity_column,
-                self.config.unit_column,
-                self.config.price_column
-            ]
-            missing_optional = [col for col in optional_cols if col not in df.columns]
-            if missing_optional:
-                logger.warning(
-                    f"Additional feature columns not found: {missing_optional}. "
-                    f"These features will be skipped. Available columns: {df.columns.tolist()}"
-                )
+        self._validate_columns(df)
         
         logger.info(f"Dataset loaded successfully with {len(df)} samples")
         self.df = df
@@ -241,13 +274,13 @@ class DataLoader:
         
         # Preprocess additional features if enabled
         if self.config.use_additional_features:
-            # Handle quantity column
+            # Handle quantity column: convert German decimal format (comma) to float
             if self.config.quantity_column in df.columns:
-                df[self.config.quantity_column] = pd.to_numeric(
-                    df[self.config.quantity_column], errors='coerce'
+                df[self.config.quantity_column] = df[self.config.quantity_column].apply(
+                    self._parse_german_float
                 )
             else:
-                df[self.config.quantity_column] = None
+                df[self.config.quantity_column] = np.nan
             
             # Handle unit column
             if self.config.unit_column in df.columns:
@@ -259,13 +292,13 @@ class DataLoader:
             else:
                 df[self.config.unit_column] = None
             
-            # Handle price column
+            # Handle price column: convert German decimal format (comma) to float
             if self.config.price_column in df.columns:
-                df[self.config.price_column] = pd.to_numeric(
-                    df[self.config.price_column], errors='coerce'
+                df[self.config.price_column] = df[self.config.price_column].apply(
+                    self._parse_german_float
                 )
             else:
-                df[self.config.price_column] = None
+                df[self.config.price_column] = np.nan
         
         # Normalize labels to lowercase
         df[self.config.label_column] = (

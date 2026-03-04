@@ -16,25 +16,30 @@ The system uses a fine-tuned **DistilBERT** model specifically trained on German
 
 ### Prerequisites
 
-Make sure you have Python installed and all dependencies:
+This project uses **[uv](https://docs.astral.sh/uv/)** for fast, reliable dependency management. Install uv if needed:
 
 ```bash
-pip install -r requirements.txt
+# Install uv (Windows PowerShell)
+irm https://astral.sh/uv/install.ps1 | iex
+
+# Install uv (macOS/Linux)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-If you want to train on CPU use
+Then sync dependencies (CPU-only PyTorch, no GPU required):
 
 ```bash
-pip install -r requirements-cpu.txt
+uv sync
 ```
+
+> **Using pip?** Run `uv export --no-emit-project > requirements.txt` to generate a `requirements.txt`, then `pip install -r requirements.txt`.
 
 ### Step 1: Train the Model
 
-Navigate to the `src` directory and run the training pipeline:
+Run the training pipeline with uv:
 
 ```bash
-cd src
-python .\train_pipeline.py
+uv run --directory src train_pipeline.py
 ```
 
 #### 📁 Files Created During Training
@@ -62,8 +67,7 @@ mlflow ui
 After training, you can make predictions on new data:
 
 ```bash
-cd src
-python .\inference.py --input_csv ../data/new_data.csv
+uv run --directory src inference.py --input_csv ../data/new_data.csv
 ```
 
 > **Note:** The `new_data.csv` file in the `data/` directory will be used by default if you specify it. The script requires the `--input_csv` argument to specify which CSV file to process.
@@ -96,13 +100,13 @@ You can override configuration values using command-line arguments:
 
 ```bash
 # Use custom dataset path
-python train_pipeline.py --dataset_path ../data/my_custom_dataset.xlsx
+uv run --directory src train_pipeline.py --dataset_path ../data/my_custom_dataset.xlsx
 
 # Use custom model save directory
-python train_pipeline.py --model_save_dir ../models/my_model
+uv run --directory src train_pipeline.py --model_save_dir ../models/my_model
 
 # Override multiple settings
-python train_pipeline.py --dataset_path ../data/dataset.xlsx --model_save_dir ../models/production_model
+uv run --directory src train_pipeline.py --dataset_path ../data/dataset.xlsx --model_save_dir ../models/production_model
 ```
 
 #### Configuration File
@@ -140,19 +144,19 @@ The inference pipeline loads a trained model and makes predictions on new, unlab
 
 ```bash
 # Basic inference with default settings
-python inference.py --input_csv ../data/new_data.csv
+uv run --directory src inference.py --input_csv ../data/new_data.csv
 
 # Use a specific model
-python inference.py --input_csv ../data/new_data.csv --model_path ../models/custom_model
+uv run --directory src inference.py --input_csv ../data/new_data.csv --model_path ../models/custom_model
 
 # Specify custom output location
-python inference.py --input_csv ../data/new_data.csv --output_csv ../data/results.csv
+uv run --directory src inference.py --input_csv ../data/new_data.csv --output_csv ../data/results.csv
 
 # Use different text column name
-python inference.py --input_csv ../data/new_data.csv --text_column description
+uv run --directory src inference.py --input_csv ../data/new_data.csv --text_column description
 
 # Adjust batch size for faster inference
-python inference.py --input_csv ../data/new_data.csv --batch_size 64
+uv run --directory src inference.py --input_csv ../data/new_data.csv --batch_size 64
 ```
 
 #### Input CSV Format
@@ -204,7 +208,8 @@ inventory-text-classification/
 │   ├── *_metrics.json      # Metrics files
 │   └── confusion_matrix_*.png
 ├── logs/                    # 📝 Training logs
-├── requirements.txt         # 📋 Python dependencies
+├── pyproject.toml          # 📋 Project config & dependencies
+├── uv.lock                  # 🔒 Locked dependency versions
 └── README.md               # 📖 This file
 ```
 
@@ -212,6 +217,8 @@ inventory-text-classification/
 
 ## 🎨 Features
 
+- ✅ **uv** - Fast dependency management with `uv sync` and `uv run`
+- ✅ **CPU-Only** - Runs entirely on CPU, no GPU required
 - ✅ **German Language Support** - Uses DistilBERT specifically trained on German text
 - ✅ **Multi-Feature Input** - Can leverage quantity, unit, and price features
 - ✅ **MLflow Integration** - Complete experiment tracking and model versioning

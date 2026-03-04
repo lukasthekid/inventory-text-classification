@@ -36,18 +36,11 @@ def set_seed_everywhere(seed: int) -> None:
     # NumPy RNG
     np.random.seed(seed)
 
-    # PyTorch RNG (CPU and CUDA)
+    # PyTorch RNG (CPU-only)
     torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
 
     # Hugging Face / Transformers utilities
     hf_set_seed(seed)
-
-    # Ensure deterministic behavior in cuDNN (at potential cost of speed)
-    if torch.backends.cudnn.is_available():
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
 
 
 def setup_logging(log_level: str = "INFO", log_file: str = None) -> logging.Logger:

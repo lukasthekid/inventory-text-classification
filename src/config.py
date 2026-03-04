@@ -14,7 +14,7 @@ class LoggingConfig:
 @dataclass
 class DataConfig:
     """Data-related configuration."""
-    dataset_path: str = "../data/dataset.xlsx"
+    dataset_path: str = "../data/dataset.csv"
     text_column: str = "text"
     label_column: str = "label"
     quantity_column: str = "quantity"  # Column name for quantity feature
@@ -51,7 +51,7 @@ class TrainingConfig:
     save_steps: int = 100
     logging_steps: int = 50
     seed: int = 42
-    fp16: bool = False  # Mixed precision training (set True if GPU available)
+    fp16: bool = False  # Mixed precision (disabled for CPU-only)
     gradient_accumulation_steps: int = 1
     use_class_weights: bool = True  # Use class weights to handle imbalance
     

@@ -169,14 +169,12 @@ class InferencePipeline:
         """
         self.model_path = Path(model_path)
         self.config = config or Config.get_default_config()
-        self.device = device or torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = device or torch.device("cpu")
         
         self.model = None
         self.tokenizer = None
         
-        logger.info(f"Using device: {self.device}")
+        logger.info(f"Using device: {self.device} (CPU-only)")
     
     def load_model(self):
         """Load model and tokenizer from saved directory."""

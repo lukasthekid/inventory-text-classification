@@ -1,7 +1,5 @@
 # 📦 Invoice Text Classification
 
-## 🎯 Project Overview
-
 This project solves the task of **automatically classifying invoice items** from German text descriptions into three categories:
 
 - 🛠️ **labor** - Work-related items (e.g., "Sicherungskasten überprüft und beschriftet")
